@@ -1,27 +1,78 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import { getToken } from '../utils/token'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    redirect: '/login'
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login/index.vue')
+  },
+  {
+    path: '/layout',
+    name: 'layout',
+    redirect: '/layout/home',
+    component: () => import('@/views/Dashboard/index.vue'),
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views/Home/index.vue')
+      },
+      {
+        path: 'user',
+        component: () => import('@/views/User/index.vue')
+      },
+      {
+        path: 'check',
+        component: () => import('@/views/Check/index.vue')
+      },
+      {
+        path: 'goods',
+        component: () => import('@/views/Goods/index.vue')
+      },
+      {
+        path: 'record',
+        component: () => import('@/views/Record/index.vue')
+      },
+      {
+        path: 'comment',
+        component: () => import('@/views/Comment/index.vue')
+      },
+      {
+        path: 'message',
+        component: () => import('@/views/Message/index.vue')
+      },
+    ]
+  },
+  {
+    path: '*',
+    component: () => import('@/views/NotFound/index.vue')
   }
 ]
 
 const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
   routes
+})
+
+// 路由前置全局守卫（在路由发生真正跳转之前，会执行该函数）
+router.beforeEach((to, from, next) => {
+  // 如果用户访问登录页面直接放行
+  if (to.path === '/login') return next()
+  // 如果没有token，强制跳转到登录页面
+  if (!getToken()) {
+    return next('/login')
+  } else {
+    // 有token放行
+    next()
+  }
 })
 
 export default router

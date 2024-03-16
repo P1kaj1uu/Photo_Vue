@@ -1,4 +1,27 @@
-const { defineConfig } = require('@vue/cli-service')
-module.exports = defineConfig({
-  transpileDependencies: true
+const path = require('path')
+
+function resolve(dir) {
+  return path.join(__dirname, dir)
+}
+
+module.exports = ({
+  devServer: {
+    port: 8068, // 设置本地默认端口
+    proxy: { // 设置代理，必须填
+      '/api': { // 设置拦截器
+        target: 'http://localhost:6068', // 代理的目标地址
+        changeOrigin: true, // 是否设置同源
+        pathRewrite: { // 路径重写
+          '^/api': '/api' // 选择忽略拦截器里面的内容
+        }
+      }
+    }
+  },
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@': resolve('src')
+      }
+    }
+  },
 })
